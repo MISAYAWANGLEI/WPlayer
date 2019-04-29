@@ -5,11 +5,13 @@ extern "C"{
 #include "libavformat/avformat.h"
 }
 
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_wanglei_wplayer_MainActivity_stringFromJNI(
-        JNIEnv *env,
-        jobject /* this */) {
-    std::string hello = "Hello from C++";
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_wanglei_wplayer_WPlayer_native_1prepare(JNIEnv *env, jobject instance,
+                                                 jstring dataSource_) {
+    const char *dataSource = env->GetStringUTFChars(dataSource_, 0);
 
-    return env->NewStringUTF(hello.c_str());
+    // TODO
+
+    env->ReleaseStringUTFChars(dataSource_, dataSource);
 }
