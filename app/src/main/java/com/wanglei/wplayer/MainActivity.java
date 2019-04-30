@@ -10,17 +10,17 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    private WPlayer dnPlayer;
+    private WPlayer player;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         SurfaceView surfaceView = findViewById(R.id.surfaceView);
-        dnPlayer = new WPlayer();
-        dnPlayer.setSurfaceView(surfaceView);
-        dnPlayer.setDataSource("rtmp://live.hkstv.hk.lxdns.com/live/hks");
-        dnPlayer.setOnPrepareListener(new WPlayer.OnPrepareListener() {
+        player = new WPlayer();
+        player.setSurfaceView(surfaceView);
+        player.setDataSource("rtmp://live.hkstv.hk.lxdns.com/live/hks");
+        player.setOnPrepareListener(new WPlayer.OnPrepareListener() {
             @Override
             public void onPrepare() {
                 runOnUiThread(new Runnable() {
@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void start(View view) {
-
+        player.prepare();
     }
 
 }
