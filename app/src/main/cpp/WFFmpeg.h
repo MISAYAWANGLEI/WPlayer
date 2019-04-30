@@ -1,8 +1,11 @@
 #include <pthread.h>
 #include "CppCallJavaUtils.h"
-#include "libavformat/avformat.h"
 #include "AudioChannel.h"
 #include "VideoChannel.h"
+
+extern "C"{
+    #include "libavformat/avformat.h"
+}
 
 class WFFmpeg {
 private:
