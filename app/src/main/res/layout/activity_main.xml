@@ -7,13 +7,14 @@
     tools:context=".MainActivity">
 
     <SurfaceView
-        app:layout_constraintTop_toTopOf="parent"
         android:id="@+id/surfaceView"
+        app:layout_constraintTop_toTopOf="parent"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         />
 
     <Button
+        android:id="@+id/bt"
         app:layout_constraintTop_toBottomOf="@+id/surfaceView"
         android:onClick="start"
         android:layout_marginTop="20dp"
