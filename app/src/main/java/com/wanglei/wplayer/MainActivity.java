@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
         SurfaceView surfaceView = findViewById(R.id.surfaceView);
         player = new WPlayer();
         player.setSurfaceView(surfaceView);
-        player.setDataSource("rtmp://live.hkstv.hk.lxdns.com/live/hks");
+        player.setDataSource("http://ksy.fffffive.com/mda-hinp1ik37b0rt1mj/mda-hinp1ik37b0rt1mj.mp4");
         player.setOnPrepareListener(new WPlayer.OnPrepareListener() {
             @Override
             public void onPrepare() {
