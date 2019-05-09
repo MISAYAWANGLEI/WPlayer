@@ -2,13 +2,15 @@
 // Created by wanglei55 on 2019/4/30.
 //
 
-#ifndef WPLAYER_AUDIOCHANNEL_H
-#define WPLAYER_AUDIOCHANNEL_H
 
+#include "BaseChannel.h"
 
-class AudioChannel {
+class AudioChannel : public BaseChannel{
+public:
+    AudioChannel(int id,AVCodecContext *codecContext);
+    ~AudioChannel();
+
+private:
 
 };
 
-
-#endif //WPLAYER_AUDIOCHANNEL_H

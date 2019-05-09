@@ -1,7 +1,9 @@
 package com.wanglei.wplayer;
 
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.TextureView;
 
 public class WPlayer implements SurfaceHolder.Callback {
 
@@ -13,9 +15,8 @@ public class WPlayer implements SurfaceHolder.Callback {
     private SurfaceHolder holder;
     private OnPrepareListener listener;
 
-
     /**
-     * 让使用 设置播放的文件 或者 直播地址
+     * 设置播放的文件或者直播地址
      */
     public void setDataSource(String dataSource) {
         this.dataSource = dataSource;
@@ -23,7 +24,6 @@ public class WPlayer implements SurfaceHolder.Callback {
 
     /**
      * 设置播放显示的画布
-     *
      * @param surfaceView
      */
     public void setSurfaceView(SurfaceView surfaceView) {
@@ -50,17 +50,17 @@ public class WPlayer implements SurfaceHolder.Callback {
     }
 
     /**
-     * 准备好 要播放的视频
+     * 准备
      */
     public void prepare() {
         native_prepare(dataSource);
     }
 
     /**
-     * 开始播放
+     * 播放
      */
     public void start() {
-
+        native_start();
     }
 
     /**
@@ -109,4 +109,5 @@ public class WPlayer implements SurfaceHolder.Callback {
 
 
     native void native_prepare(String dataSource);
+    native void native_start();
 }

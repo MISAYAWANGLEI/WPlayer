@@ -5,7 +5,7 @@ using namespace std;
 
 template <typename T>
 class SafeQuene {
-    typedef void (*releaseCallBack)(T&);//函数指针
+    typedef void (*releaseCallBack)(T*);//函数指针
 private:
     queue<T> queue;
     pthread_mutex_t mutex;

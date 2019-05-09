@@ -1,7 +1,6 @@
 //
 // Created by wanglei55 on 2019/4/30.
 //
-
 #include "WFFmpeg.h"
 #include "macro.h"
 #include <pthread.h>
@@ -37,6 +36,7 @@ void WFFmpeg::_prepare() {
         utils->onError(THREAD_CHILD,FFMPEG_CAN_NOT_OPEN_URL);
         return;
     }
+
     //查找媒体中音视频流信息
     ret = avformat_find_stream_info(formatContext,0);
     if(ret<0){
@@ -79,9 +79,10 @@ void WFFmpeg::_prepare() {
         }
 
         if(parameters->codec_type == AVMEDIA_TYPE_AUDIO){//音频
-            audioChannel = new AudioChannel;
+            audioChannel = new AudioChannel(i,codecContext);
         } else if (parameters->codec_type == AVMEDIA_TYPE_VIDEO){//视频
-            videoChannel = new VideoChannel;
+            videoChannel = new VideoChannel(i,codecContext);
+            videoChannel->setRenderFrameCallBack(frameCallBack);
         }
     }
 
@@ -94,10 +95,46 @@ void WFFmpeg::_prepare() {
     utils->onPrepare(THREAD_CHILD);
 }
 
+void * play(void* args){
+    WFFmpeg *ffmpeg = static_cast<WFFmpeg *>(args);
+    ffmpeg->_start();
+}
+
+void WFFmpeg::start() {
+    isPlaying = 1;
+    if (videoChannel){
+        videoChannel->packets.setWork(1);
+        videoChannel->play();
+    }
+    //开启线程读取未加压的数据
+    pthread_create(&pid_play,0,play,this);
+}
 
 
+void WFFmpeg::_start() {
+    int ret;
+    while (isPlaying){
+        AVPacket* packet = av_packet_alloc();
+        //0 if OK, < 0 on error or end of file
+        ret = av_read_frame(formatContext,packet);
+        if (ret == 0){
+            if (audioChannel && packet->stream_index == audioChannel->id){
+                //音频
+            } else if(videoChannel && packet->stream_index == videoChannel->id){
+                //视频
+                videoChannel ->packets.push(packet);//将数据塞到视频队列中
+            }
+        } else if(ret == AVERROR_EOF){//读取完成
 
+        } else{
 
+        }
+    }
+}
+
+void WFFmpeg::setRenderFrameCallback(renderFrameCallBack callback) {
+    this->frameCallBack = callback;
+}
 
 
 

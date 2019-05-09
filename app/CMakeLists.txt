@@ -18,4 +18,4 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${CMAKE_SOURCE_DIR}/src/main/cpp/libs/
 target_link_libraries(
         native-lib
         avformat avcodec avfilter avutil swresample swscale
-        log z)
+        log z android)
