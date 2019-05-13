@@ -10,7 +10,6 @@ public class WPlayer implements SurfaceHolder.Callback {
     static {
         System.loadLibrary("native-lib");
     }
-
     private String dataSource;
     private SurfaceHolder holder;
     private OnPrepareListener listener;
@@ -94,7 +93,7 @@ public class WPlayer implements SurfaceHolder.Callback {
      */
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
+        native_setSurface(holder.getSurface());
     }
 
     /**
@@ -110,4 +109,5 @@ public class WPlayer implements SurfaceHolder.Callback {
 
     native void native_prepare(String dataSource);
     native void native_start();
+    native void native_setSurface(Surface surface);
 }

@@ -22,5 +22,6 @@ private:
     pthread_t decode_id;
     pthread_t render_id;
     renderFrameCallBack frameCallBack;
+    SwsContext *swsContext = 0;
 };
 
