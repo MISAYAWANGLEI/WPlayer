@@ -3,6 +3,8 @@
 #include "AudioChannel.h"
 #include "VideoChannel.h"
 
+using namespace std;
+
 extern "C"{
     #include "libavformat/avformat.h"
 }
