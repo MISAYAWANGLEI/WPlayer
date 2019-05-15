@@ -1,5 +1,6 @@
 package com.wanglei.wplayer;
 
+import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -26,12 +27,15 @@ public class WPlayer implements SurfaceHolder.Callback {
      * @param surfaceView
      */
     public void setSurfaceView(SurfaceView surfaceView) {
+        if (null != holder){
+            holder.removeCallback(this);
+        }
         holder = surfaceView.getHolder();
         holder.addCallback(this);
     }
 
     public void onError(int errorCode){
-        System.out.println("Java接到回调:"+errorCode);
+        Log.i("WFFMPEG","Java接到回调:"+errorCode);
     }
 
 
@@ -93,6 +97,7 @@ public class WPlayer implements SurfaceHolder.Callback {
      */
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        Log.i("WFFMPEG","surfaceChanged");
         native_setSurface(holder.getSurface());
     }
 

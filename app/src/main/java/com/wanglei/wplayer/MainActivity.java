@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
         SurfaceView surfaceView = findViewById(R.id.surfaceView);
         player = new WPlayer();
         player.setSurfaceView(surfaceView);
-        player.setDataSource("http://ksy.fffffive.com/mda-hinp1ik37b0rt1mj/mda-hinp1ik37b0rt1mj.mp4");
+        player.setDataSource("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8");
         player.setOnPrepareListener(new WPlayer.OnPrepareListener() {
             @Override
             public void onPrepare() {

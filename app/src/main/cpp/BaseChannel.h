@@ -1,18 +1,19 @@
-//
-// Created by wanglei55 on 2019/5/8.
-//
-#include "SafeQuene.h"
+#ifndef B_H
+#define B_H
+
+#include "SafeQueue.h"
 
 extern "C"{
 #include <libavcodec/avcodec.h>
 }
 
-
 class BaseChannel {
 public:
-    BaseChannel(int id,AVCodecContext *codecContext):id(id),codecContext(codecContext){}
+    BaseChannel(int id,AVCodecContext *codecContext):id(id),codecContext(codecContext){
+        packets.setReleaseCallBack(releaseAVPacket);
+    }
+
     virtual ~BaseChannel(){
-        packets.setReleaseCallBack(BaseChannel::releaseAVPacket);
         packets.clear();
     }
 
@@ -32,9 +33,10 @@ public:
 
     int id;
     bool isPlaying;
-    virtual void play();
+    virtual void play() = 0;
     AVCodecContext *codecContext;
-    SafeQuene<AVPacket*> packets;
-    SafeQuene<AVFrame*> frames;//盛放解码出的视频或音频frame
+    SafeQueue<AVPacket *> packets;
+    SafeQueue<AVFrame *> frames;
 };
 
+#endif

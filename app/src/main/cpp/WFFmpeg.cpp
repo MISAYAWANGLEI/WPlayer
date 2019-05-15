@@ -30,7 +30,10 @@ void WFFmpeg::_prepare() {
     //初始化网络
     avformat_network_init();
     //打开媒体地址，相关信息存入formatContext
-    int ret = avformat_open_input(&formatContext,dataSource,0,0);
+    AVDictionary *options = 0;
+    //设置超时时间 微妙 超时时间5秒
+    av_dict_set(&options, "timeout", "50000000", 0);
+    int ret = avformat_open_input(&formatContext,dataSource,0,&options);
     if (ret!=0){
         LOGE("打开媒体地址失败:%s",av_err2str(ret));
         utils->onError(THREAD_CHILD,FFMPEG_CAN_NOT_OPEN_URL);
@@ -98,6 +101,7 @@ void WFFmpeg::_prepare() {
 void * play(void* args){
     WFFmpeg *ffmpeg = static_cast<WFFmpeg *>(args);
     ffmpeg->_start();
+    return 0;
 }
 
 void WFFmpeg::start() {

@@ -1,31 +1,38 @@
-#include <pthread.h>
+#ifndef S_H
+#define S_H
+
 #include <queue>
+#include <pthread.h>
 
 using namespace std;
 
 template <typename T>
-class SafeQuene {
-    typedef void (*releaseCallBack)(T*);//函数指针
-private:
-    queue<T> queue;
-    pthread_mutex_t mutex;
-    pthread_cond_t cond;
-    int work;
-    releaseCallBack mReleaseCallBack;
-
+class SafeQueue {
+    typedef void (*releaseCallBack)(T *);
+    typedef void (*SyncHandle)(queue<T> &);
 public:
-    SafeQuene(){
+    SafeQueue(){
         pthread_mutex_init(&mutex,NULL);
         pthread_cond_init(&cond,NULL);
     }
 
-    ~SafeQuene(){
+    ~SafeQueue(){
         pthread_cond_destroy(&cond);
         pthread_mutex_destroy(&mutex);
     }
 
     void setReleaseCallBack(releaseCallBack callBack) {
         mReleaseCallBack = callBack;
+    }
+
+    void setSyncHandle(SyncHandle s) {
+        syncHandle = s;
+    }
+
+    void sync(){
+        pthread_mutex_lock(&mutex);
+        syncHandle(queue);
+        pthread_mutex_unlock(&mutex);
     }
 
     void setWork(int work){
@@ -73,10 +80,19 @@ public:
         int size = queue.size();
         for (int i = 0; i < size; ++i) {
             T value = queue.front();
-            mReleaseCallBack(value);
+            mReleaseCallBack(&value);
             queue.pop();
         }
         pthread_mutex_unlock(&mutex);
     }
+
+private:
+    queue<T> queue;
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
+    int work;
+    releaseCallBack mReleaseCallBack;
+    SyncHandle syncHandle;
 };
 
+#endif

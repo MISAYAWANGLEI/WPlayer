@@ -9,7 +9,7 @@ class AudioChannel : public BaseChannel{
 public:
     AudioChannel(int id,AVCodecContext *codecContext);
     ~AudioChannel();
-
+    void play();
 private:
 
 };

@@ -4,10 +4,10 @@
 #include <android/native_window_jni.h>
 #include "macro.h"
 
-
 extern "C"{
     #include "libavformat/avformat.h"
 }
+
 ANativeWindow *nativeWindow = 0;
 WFFmpeg *ffmpeg = nullptr;
 JavaVM *javaVm = nullptr;
@@ -44,7 +44,7 @@ void frrameCallBack(uint8_t *data, int lineSize, int width, int height){
     //nativeWindow_buffer.stride表示每一行的像素数，每个像素由RGBA 4个字节组成
     int dst_linesize = nativeWindow_buffer.stride *4;
     for (int i = 0; i < nativeWindow_buffer.height; ++i) {
-        memccpy(dst_data+i*dst_linesize,data+i*lineSize,dst_linesize);
+        memcpy(dst_data+i*dst_linesize,data+i*lineSize,dst_linesize);
     }
     ANativeWindow_unlockAndPost(nativeWindow);
     pthread_mutex_unlock(&mutex);
@@ -74,7 +74,7 @@ JNIEXPORT void JNICALL
 Java_com_wanglei_wplayer_WPlayer_native_1setSurface(JNIEnv *env, jobject instance,
                                                     jobject surface) {
     pthread_mutex_lock(&mutex);
-    if (!nativeWindow){
+    if (nativeWindow){
         ANativeWindow_release(nativeWindow);
         nativeWindow = 0;
     }

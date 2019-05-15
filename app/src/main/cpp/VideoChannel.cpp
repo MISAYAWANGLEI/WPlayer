@@ -23,6 +23,7 @@ VideoChannel::~VideoChannel() {
 void * decode_task(void* args){
     VideoChannel *videoChannel = static_cast<VideoChannel *>(args);
     videoChannel->decode();
+    return 0;
 }
 
 /**
@@ -33,6 +34,7 @@ void * decode_task(void* args){
 void * render_task(void* args){
     VideoChannel *videoChannel = static_cast<VideoChannel *>(args);
     videoChannel->render();
+    return 0;
 }
 
 void VideoChannel::play() {

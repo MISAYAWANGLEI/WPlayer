@@ -11,3 +11,7 @@ AudioChannel::AudioChannel(int id,AVCodecContext *codecContext):BaseChannel(id,c
 AudioChannel::~AudioChannel() {
 
 }
+
+void AudioChannel::play() {
+
+}
