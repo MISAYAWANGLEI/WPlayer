@@ -203,8 +203,11 @@ void * play(void* args){
 
 void WFFmpeg::start() {
     isPlaying = 1;
+    if(audioChannel){
+        audioChannel->play();
+    }
+
     if (videoChannel){
-        videoChannel->packets.setWork(1);
         videoChannel->play();
     }
     //开启线程读取未加压的数据
@@ -256,6 +259,7 @@ void WFFmpeg::_start() {
         if (ret == 0){
             if (audioChannel && packet->stream_index == audioChannel->id){
                 //音频
+                audioChannel ->packets.push(packet);
             } else if(videoChannel && packet->stream_index == videoChannel->id){
                 //视频
                 videoChannel ->packets.push(packet);//将数据塞到视频队列中
