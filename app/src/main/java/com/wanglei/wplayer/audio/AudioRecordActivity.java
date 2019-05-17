@@ -1,4 +1,4 @@
-package com.wanglei.wplayer.audioplayer;
+package com.wanglei.wplayer.audio;
 
 
 import android.support.v7.app.AppCompatActivity;
@@ -9,15 +9,17 @@ import java.io.FileNotFoundException;
 
 public class AudioRecordActivity extends AppCompatActivity {
 
-    private AudioPlayer audioPlayer;
+    private AudioTest audioPlayer;
     private WaveEncoder waveEncoder;
+    private WaveDecoder waveDecoder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_audio_record);
-        audioPlayer = new AudioPlayer();
+        audioPlayer = new AudioTest();
         waveEncoder = new WaveEncoder();
+        waveDecoder = new WaveDecoder();
         try {
             waveEncoder.prepare(FileUtils.createFilePath());
         } catch (FileNotFoundException e) {
@@ -49,4 +51,11 @@ public class AudioRecordActivity extends AppCompatActivity {
         }
     }
 
+    public void wavplaystart(View view) {
+        waveDecoder.start();
+    }
+
+    public void wavplaystop(View view) {
+        waveDecoder.stop();
+    }
 }

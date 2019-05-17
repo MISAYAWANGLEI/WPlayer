@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".PlayerActivity"></activity>
-        <activity android:name=".audioplayer.AudioRecordActivity"></activity>
+        <activity android:name=".audio.AudioRecordActivity"></activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -1,4 +1,4 @@
-package com.wanglei.wplayer.audioplayer.wav;
+package com.wanglei.wplayer.audio.wav;
 
 import java.io.DataInputStream;
 import java.io.FileInputStream;
@@ -32,10 +32,14 @@ public class WaveReader {
         return false;
     }
 
-    public void closeFile() throws IOException {
+    public void closeFile(){
         if (dataInputStream != null) {
-            dataInputStream.close();
-            dataInputStream = null;
+            try {
+                dataInputStream.close();
+                dataInputStream = null;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

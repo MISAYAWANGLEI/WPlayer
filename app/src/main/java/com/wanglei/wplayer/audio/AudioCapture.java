@@ -1,4 +1,4 @@
-package com.wanglei.wplayer.audioplayer;
+package com.wanglei.wplayer.audio;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -14,6 +14,7 @@ public class AudioCapture {
     public static final int DEFAULT_CHANNEL = AudioFormat.CHANNEL_IN_MONO; //默认单通道
     public static final int SIMPLE_FORMAT = AudioFormat.ENCODING_PCM_16BIT; //16位量化
     private static final int DEFAULT_SOURCE_MIC = MediaRecorder.AudioSource.MIC; //声音从麦克风采集而来
+    private static final int SOURCE_VOICE_COMMUNICATION = MediaRecorder.AudioSource.VOICE_COMMUNICATION;//消除噪声及回声
 
     private volatile boolean isExit = true;
     private volatile boolean isStart = false;
@@ -36,7 +37,7 @@ public class AudioCapture {
     }
 
     public boolean start() {
-        return start(DEFAULT_SOURCE_MIC, DEFAULT_SAMPLE_RATE, DEFAULT_CHANNEL, SIMPLE_FORMAT);
+        return start(SOURCE_VOICE_COMMUNICATION, DEFAULT_SAMPLE_RATE, DEFAULT_CHANNEL, SIMPLE_FORMAT);
     }
 
     public boolean start(int audioSource, int simpleRate, int channels, int audioFormat) {
@@ -114,7 +115,8 @@ public class AudioCapture {
             return null;
         }
         int audioRecordBufferSize = minBufferSize * 4; //AudioRecord内部缓冲设置为4帧音频帧的大小句
-        AudioRecord audioRecord = new AudioRecord(audioSource, simpleRate, channels, audioFormat, audioRecordBufferSize);
+        AudioRecord audioRecord = new AudioRecord(audioSource,
+                simpleRate, channels, audioFormat, audioRecordBufferSize);
         if (audioRecord.getState() == AudioRecord.STATE_UNINITIALIZED) {
             Log.d(TAG, "初始化AudioRecord失败!");
             return null;

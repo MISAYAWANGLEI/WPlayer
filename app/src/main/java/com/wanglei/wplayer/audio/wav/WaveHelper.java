@@ -1,4 +1,4 @@
-package com.wanglei.wplayer.audioplayer.wav;
+package com.wanglei.wplayer.audio.wav;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

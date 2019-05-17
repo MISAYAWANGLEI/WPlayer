@@ -1,11 +1,13 @@
-package com.wanglei.wplayer.audioplayer;
+package com.wanglei.wplayer.audio;
 
 
-import com.wanglei.wplayer.audioplayer.wav.WaveWriter;
+import com.wanglei.wplayer.audio.wav.WaveWriter;
 
 import java.io.FileNotFoundException;
 
-
+/**
+ * 录制音频并保存为wav文件
+ */
 public class WaveEncoder implements AudioCapture.OnAudioCaptureListener {
 
     private WaveWriter mWaveWriter;

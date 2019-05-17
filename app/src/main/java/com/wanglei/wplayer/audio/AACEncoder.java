@@ -1,4 +1,4 @@
-package com.wanglei.wplayer.audioplayer;
+package com.wanglei.wplayer.audio;
 
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
@@ -10,15 +10,14 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-
+/**
+ * 利用MediaCodec將pcm数据编码为ACC
+ */
 public class AACEncoder implements AudioCapture.OnAudioCaptureListener {
 
     public static final int DEFAULT_BIT_RATE = 128 * 1024; //128kb
-
     public static final int DEFAULT_SIMPLE_RATE = 44100; //44100Hz
-
     public static final int DEFAULT_CHANNEL_COUNTS = 1;
-
     public static final int DEFAULT_MAX_INPUT_SIZE = 16384; //16k
 
     private MediaCodec mediaCodec;
@@ -57,15 +56,6 @@ public class AACEncoder implements AudioCapture.OnAudioCaptureListener {
         }
     }
 
-    private MediaFormat createMediaFormat() {
-        MediaFormat mediaFormat = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC,
-                DEFAULT_SIMPLE_RATE, DEFAULT_CHANNEL_COUNTS);
-        mediaFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
-        mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, DEFAULT_BIT_RATE);
-        mediaFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, DEFAULT_MAX_INPUT_SIZE);
-        return mediaFormat;
-    }
-
     private void configure() {
         mediaCodec = createMediaCodec();
         if (mediaCodec == null) {
@@ -92,6 +82,16 @@ public class AACEncoder implements AudioCapture.OnAudioCaptureListener {
             }
         }
         return null;
+    }
+
+    private MediaFormat createMediaFormat() {
+        MediaFormat mediaFormat = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC,
+                DEFAULT_SIMPLE_RATE, DEFAULT_CHANNEL_COUNTS);
+        mediaFormat.setInteger(MediaFormat.KEY_AAC_PROFILE,
+                MediaCodecInfo.CodecProfileLevel.AACObjectLC);
+        mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, DEFAULT_BIT_RATE);
+        mediaFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, DEFAULT_MAX_INPUT_SIZE);
+        return mediaFormat;
     }
 
     public void start() {

@@ -1,4 +1,4 @@
-package com.wanglei.wplayer.audioplayer;
+package com.wanglei.wplayer.audio;
 
 import android.os.Environment;
 
@@ -11,10 +11,12 @@ import java.io.IOException;
 
 public class FileUtils {
 
-    public static String createFilePath(){
-        String filePath = Environment.getExternalStorageDirectory().getAbsolutePath()+ File.separator+"yin.wav";
+    public static String filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "yin.wav";
+
+    public static String createFilePath() {
+
         File file = new File(filePath);
-        if (!file.exists()){
+        if (!file.exists()) {
             try {
                 file.createNewFile();
             } catch (IOException e) {

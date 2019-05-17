@@ -33,4 +33,18 @@
         android:onClick="wavstop"
         android:text="音频PCM数据转为WAV文件_结束" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="wavplaystart"
+        android:layout_gravity="center_horizontal"
+        android:text="WAV文件播放_开始" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:onClick="wavplaystop"
+        android:text="WAV文件播放_结束" />
+
 </LinearLayout>

@@ -1,4 +1,4 @@
-package com.wanglei.wplayer.audioplayer.wav;
+package com.wanglei.wplayer.audio.wav;
 
 import android.util.Log;
 

@@ -1,14 +1,16 @@
-package com.wanglei.wplayer.audioplayer;
+package com.wanglei.wplayer.audio;
 
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.util.Log;
 
+/**
+ * 实时录制并播放
+ */
+public class AudioTest implements AudioCapture.OnAudioCaptureListener {
 
-public class AudioPlayer implements AudioCapture.OnAudioCaptureListener {
-
-    private static final String TAG = "AudioPlayer";
+    private static final String TAG = "AudioTest";
 
     private static final int SIMPLE_RATE = 44100; //采样率
     private static final int FORMAT = AudioFormat.ENCODING_PCM_16BIT; //量化位宽
@@ -23,14 +25,11 @@ public class AudioPlayer implements AudioCapture.OnAudioCaptureListener {
     private static final int PLAY_MODE = AudioTrack.MODE_STREAM;
     //使用相对底层的AudioTrack来播放
     private AudioTrack audioTrack;
-
     private AudioCapture mAudioCapture;
-
     private volatile boolean isStart = false;
 
-    public AudioPlayer() {
+    public AudioTest() {
         mAudioCapture = new AudioCapture();
-        mAudioCapture.
         mAudioCapture.setOnAudioCaptureListener(this);
     }
 
