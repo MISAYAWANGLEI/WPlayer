@@ -5,6 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+import com.wanglei.wplayer.audioplayer.AudioRecordActivity;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -15,6 +17,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void toPlayer(View view) {
         Intent i = new Intent(this,PlayerActivity.class);
+        startActivity(i);
+    }
+
+    public void toAudio(View view) {
+        Intent i = new Intent(this, AudioRecordActivity.class);
         startActivity(i);
     }
 }
