@@ -9,12 +9,15 @@ extern "C"{
 
 class BaseChannel {
 public:
-    BaseChannel(int id,AVCodecContext *codecContext):id(id),codecContext(codecContext){
+    BaseChannel(int id,AVCodecContext *codecContext,AVRational timeBase):id(id),
+                        codecContext(codecContext),timeBase(timeBase){
         packets.setReleaseCallBack(releaseAVPacket);
+        frames.setReleaseCallBack(releaseAVFrame);
     }
 
     virtual ~BaseChannel(){
         packets.clear();
+        frames.clear();
     }
 
     static void releaseAVPacket(AVPacket **packet){
@@ -37,6 +40,8 @@ public:
     AVCodecContext *codecContext;
     SafeQueue<AVPacket *> packets;
     SafeQueue<AVFrame *> frames;
+    AVRational timeBase;
+    double clock;//音频或者视频相对时间：相对录制时的时间，用于音视频同步
 };
 
 #endif

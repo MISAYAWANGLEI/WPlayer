@@ -178,10 +178,13 @@ void WFFmpeg::_prepare() {
             return;
         }
 
+        AVRational timeBase = avStream->time_base;
         if(parameters->codec_type == AVMEDIA_TYPE_AUDIO){//音频
-            audioChannel = new AudioChannel(i,codecContext);
+
+            audioChannel = new AudioChannel(i,codecContext,timeBase);
         } else if (parameters->codec_type == AVMEDIA_TYPE_VIDEO){//视频
-            videoChannel = new VideoChannel(i,codecContext);
+
+            videoChannel = new VideoChannel(i,codecContext,timeBase,fps);
             videoChannel->setRenderFrameCallBack(frameCallBack);
         }
     }
@@ -208,6 +211,7 @@ void WFFmpeg::start() {
     }
 
     if (videoChannel){
+        videoChannel->setAudioChannel(audioChannel);
         videoChannel->play();
     }
     //开启线程读取未加压的数据
@@ -265,9 +269,15 @@ void WFFmpeg::_start() {
                 videoChannel ->packets.push(packet);//将数据塞到视频队列中
             }
         } else if(ret == AVERROR_EOF){//读取完成
-
+            if (packet){
+                av_packet_free(&packet);
+                packet = 0;
+            }
         } else{
-
+            if (packet){
+                av_packet_free(&packet);
+                packet = 0;
+            }
         }
     }
 }

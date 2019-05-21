@@ -6,7 +6,7 @@
 
 #include "AudioChannel.h"
 
-AudioChannel::AudioChannel(int id,AVCodecContext *codecContext):BaseChannel(id,codecContext) {
+AudioChannel::AudioChannel(int id,AVCodecContext *codecContext,AVRational timeBase):BaseChannel(id,codecContext,timeBase) {
     //声道数
     out_channels = av_get_channel_layout_nb_channels(AV_CH_LAYOUT_STEREO);
     //每个采样16位表示
@@ -19,7 +19,10 @@ AudioChannel::AudioChannel(int id,AVCodecContext *codecContext):BaseChannel(id,c
 }
 
 AudioChannel::~AudioChannel() {
-
+    if (data){//释放内存
+        free(data);
+        data = 0;
+    }
 }
 
 void * audio_decode(void *args){
@@ -106,6 +109,8 @@ int AudioChannel::getPcm() {
     }
     //算成双声道字节数：每个采样16位表示（2字节）
     dataSize = samples * out_channels * out_samplesize;
+    //记录这一帧音频相对时间
+    clock = frame->pts * av_q2d(timeBase);
     return dataSize;
 }
 
