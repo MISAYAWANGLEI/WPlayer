@@ -19,6 +19,7 @@ public:
     void decode();
     void _play();
     int getPcm();
+    void stop();
     uint8_t *data = 0;
     int out_channels;
     int out_samplesize;

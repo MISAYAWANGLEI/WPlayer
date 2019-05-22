@@ -37,6 +37,7 @@ public:
     int id;
     bool isPlaying;
     virtual void play() = 0;
+    virtual void stop() = 0;
     AVCodecContext *codecContext;
     SafeQueue<AVPacket *> packets;
     SafeQueue<AVFrame *> frames;

@@ -19,6 +19,7 @@ public:
     void setRenderFrameCallBack(renderFrameCallBack callBack);
     void decode();//解码
     void render();//播放
+    void stop();
     void setAudioChannel(AudioChannel *audioChannel);
 private:
     pthread_t decode_id;

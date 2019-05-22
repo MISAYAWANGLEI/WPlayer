@@ -153,7 +153,7 @@ void VideoChannel::render() {
                     if(fabs(diff) >= 0.05){//差距比较大，考虑视频丢包
                         releaseAVFrame(&frame);
                         frames.sync();
-                    } else{//差距没那么大，视频快点播放不延时了
+                    } else{//差距没那么大，视频不用丢包，播放不延时就可以了
 
                     }
                 }
@@ -169,4 +169,8 @@ void VideoChannel::render() {
 
 void VideoChannel::setRenderFrameCallBack(renderFrameCallBack callBack) {
     this->frameCallBack = callBack;
+}
+
+void VideoChannel::stop() {
+
 }

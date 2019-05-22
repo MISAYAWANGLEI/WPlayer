@@ -1,9 +1,6 @@
 //
 // Created by wanglei55 on 2019/4/30.
 //
-
-
-
 #include "AudioChannel.h"
 
 AudioChannel::AudioChannel(int id,AVCodecContext *codecContext,AVRational timeBase):BaseChannel(id,codecContext,timeBase) {
@@ -52,7 +49,7 @@ void AudioChannel::decode() {
         if(ret!=0){
             break;
         }
-        //解码后的数据，代表一个画面
+        //解码后的数据
         AVFrame *frame = av_frame_alloc();
         ret = avcodec_receive_frame(codecContext,frame);
         //需要更多的数据才能够进行解码
@@ -217,3 +214,6 @@ void AudioChannel::play() {
     pthread_create(&pid_play,0,audio_play,this);
 }
 
+void AudioChannel::stop() {
+
+}

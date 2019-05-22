@@ -7,6 +7,9 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <string>
+extern "C"{
+#include <libavutil/time.h>
+}
 
 WFFmpeg::WFFmpeg(CppCallJavaUtils *utils, const char *dataSource) {
     this->utils = utils;
@@ -26,7 +29,7 @@ void *start_prepare(void* args){
 }
 
 void WFFmpeg::prepare() {
-    pthread_create(&pid,0,start_prepare,this);
+    pthread_create(&pid_prepare,0,start_prepare,this);
 }
 
 void WFFmpeg::_prepare() {
@@ -39,7 +42,9 @@ void WFFmpeg::_prepare() {
     int ret = avformat_open_input(&formatContext,dataSource,0,&options);
     if (ret!=0){
         LOGE("打开媒体地址失败:%s",av_err2str(ret));
-        utils->onError(THREAD_CHILD,FFMPEG_CAN_NOT_OPEN_URL);
+        if (utils){
+            utils->onError(THREAD_CHILD,FFMPEG_CAN_NOT_OPEN_URL);
+        }
         return;
     }
 
@@ -47,7 +52,9 @@ void WFFmpeg::_prepare() {
     ret = avformat_find_stream_info(formatContext,0);
     if(ret<0){
         LOGE("查找媒体中音视频流信息失败:%s",av_err2str(ret));
-        utils->onError(THREAD_CHILD,FFMPEG_CAN_NOT_FIND_STREAMS);
+        if (utils){
+            utils->onError(THREAD_CHILD,FFMPEG_CAN_NOT_FIND_STREAMS);
+        }
         return;
     }
 
@@ -129,7 +136,9 @@ void WFFmpeg::_prepare() {
         AVCodec *codec = avcodec_find_decoder(parameters->codec_id);
         if (codec==NULL){
             LOGE("查找解码器失败:%s",av_err2str(ret));
-            utils->onError(THREAD_CHILD,FFMPEG_FIND_DECODER_FAIL);
+            if (utils) {
+                utils->onError(THREAD_CHILD, FFMPEG_FIND_DECODER_FAIL);
+            }
             return;
         }
         LOGE("codec->name:%s",codec->name);
@@ -160,21 +169,27 @@ void WFFmpeg::_prepare() {
 //        int level：级（和profile差不太多）
         if(codecContext == NULL){
             LOGE("创建解码器上下文失败:%s",av_err2str(ret));
-            utils->onError(THREAD_CHILD,FFMPEG_ALLOC_CODEC_CONTEXT_FAIL);
+            if (utils) {
+                utils->onError(THREAD_CHILD, FFMPEG_ALLOC_CODEC_CONTEXT_FAIL);
+            }
             return;
         }
         //拷贝参数从parameters到codecContext
         ret = avcodec_parameters_to_context(codecContext,parameters);
         if(ret<0){
             LOGE("拷贝参数从parameters到codecContext失败:%s",av_err2str(ret));
-            utils->onError(THREAD_CHILD,FFMPEG_CODEC_CONTEXT_PARAMETERS_FAIL);
+            if (utils) {
+                utils->onError(THREAD_CHILD, FFMPEG_CODEC_CONTEXT_PARAMETERS_FAIL);
+            }
             return;
         }
         //打开解码器
         ret = avcodec_open2(codecContext,codec,0);
         if (ret != 0){
             LOGE("打开解码器失败:%s",av_err2str(ret));
-            utils->onError(THREAD_CHILD,FFMPEG_OPEN_DECODER_FAIL);
+            if (utils) {
+                utils->onError(THREAD_CHILD, FFMPEG_OPEN_DECODER_FAIL);
+            }
             return;
         }
 
@@ -191,11 +206,15 @@ void WFFmpeg::_prepare() {
 
     if (!audioChannel && !videoChannel){
         LOGE("没有音视频");
-        utils->onError(THREAD_CHILD,FFMPEG_NOMEDIA);
+        if (utils) {
+            utils->onError(THREAD_CHILD, FFMPEG_NOMEDIA);
+        }
         return;
     }
-    //到这里prepare成功，回调java层
-    utils->onPrepare(THREAD_CHILD);
+    if (utils) {
+        //到这里prepare成功，回调java层
+        utils->onPrepare(THREAD_CHILD);
+    }
 }
 
 void * play(void* args){
@@ -246,6 +265,17 @@ uint8_t motion_subsample_log2：一个宏块中的运动矢量采样个数，取
 void WFFmpeg::_start() {
     int ret;
     while (isPlaying){
+        //防止读取文件一下子读完了，导致oom
+        //读一部分拿去播
+        if (audioChannel && audioChannel->packets.size() > 100) {
+            //10ms
+            av_usleep(1000 * 10);
+            continue;
+        }
+        if (videoChannel && videoChannel->packets.size() > 100) {
+            av_usleep(1000 * 10);
+            continue;
+        }
         //AVPacket是存储压缩编码数据相关信息的结构体
 //        uint8_t *data：压缩编码的数据。
 //        例如对于H.264来说。1个AVPacket的data通常对应一个NAL。
@@ -269,6 +299,12 @@ void WFFmpeg::_start() {
                 videoChannel ->packets.push(packet);//将数据塞到视频队列中
             }
         } else if(ret == AVERROR_EOF){//读取完成
+
+            if (audioChannel->packets.empty() && audioChannel->frames.empty()
+                && videoChannel->packets.empty() && videoChannel->frames.empty()) {
+                break;
+            }
+
             if (packet){
                 av_packet_free(&packet);
                 packet = 0;
@@ -280,13 +316,43 @@ void WFFmpeg::_start() {
             }
         }
     }
+    isPlaying = 0;
+    if (audioChannel){
+        audioChannel->stop();
+    }
+    if (videoChannel){
+        videoChannel->stop();
+    }
 }
 
 void WFFmpeg::setRenderFrameCallback(renderFrameCallBack callback) {
     this->frameCallBack = callback;
 }
 
+void *syncStop(void *args){
+    WFFmpeg *ffmpeg = static_cast<WFFmpeg *>(args);
+    //等待prepare与play逻辑执行完在释放以下资源
+    pthread_join(ffmpeg->pid_prepare,0);
+    pthread_join(ffmpeg->pid_play,0);
 
+    DELETE(ffmpeg->audioChannel);
+    DELETE(ffmpeg->videoChannel);
+
+    if (ffmpeg->formatContext){
+        //先关闭读取流
+        avformat_close_input(&ffmpeg->formatContext);
+        avformat_free_context(ffmpeg->formatContext);
+        ffmpeg->formatContext = 0;
+    }
+    DELETE(ffmpeg);
+    return 0;
+}
+
+void WFFmpeg::stop() {
+    isPlaying = 0;
+    utils = 0;
+    pthread_create(&pid_stop,0,syncStop,this);
+}
 
 
 

@@ -10,11 +10,12 @@ extern "C"{
 }
 
 class WFFmpeg {
-private:
+public:
     char *dataSource = nullptr;
     CppCallJavaUtils *utils = nullptr;
-    pthread_t pid;
+    pthread_t pid_prepare;
     pthread_t pid_play;
+    pthread_t pid_stop;
     AVFormatContext *formatContext = nullptr;
     AudioChannel *audioChannel = nullptr;
     VideoChannel *videoChannel = nullptr;
@@ -27,7 +28,7 @@ public:
     void setRenderFrameCallback(renderFrameCallBack callback);
     void start();
     void _start();
-
+    void stop();
     bool isPlaying;
 };
 

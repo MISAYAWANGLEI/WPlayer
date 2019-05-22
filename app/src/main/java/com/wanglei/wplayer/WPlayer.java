@@ -70,11 +70,12 @@ public class WPlayer implements SurfaceHolder.Callback {
      * 停止播放
      */
     public void stop() {
-
+        native_stop();
     }
 
     public void release() {
         holder.removeCallback(this);
+        native_release();
     }
 
     /**
@@ -114,5 +115,7 @@ public class WPlayer implements SurfaceHolder.Callback {
 
     native void native_prepare(String dataSource);
     native void native_start();
+    native void native_stop();
+    native void native_release();
     native void native_setSurface(Surface surface);
 }

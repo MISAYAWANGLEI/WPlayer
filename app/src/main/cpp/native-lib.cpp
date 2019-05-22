@@ -12,6 +12,8 @@ ANativeWindow *nativeWindow = 0;
 WFFmpeg *ffmpeg = nullptr;
 JavaVM *javaVm = nullptr;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+CppCallJavaUtils *cppCallJavaUtils = 0;
+
 int JNI_OnLoad(JavaVM *vm, void *r) {
     javaVm = vm;
     return JNI_VERSION_1_6;
@@ -55,7 +57,7 @@ JNIEXPORT void JNICALL
 Java_com_wanglei_wplayer_WPlayer_native_1prepare(JNIEnv *env, jobject instance,
                                                  jstring dataSource_) {
     const char *dataSource = env->GetStringUTFChars(dataSource_, 0);
-    auto *cppCallJavaUtils = new CppCallJavaUtils(javaVm, env, instance);
+    cppCallJavaUtils = new CppCallJavaUtils(javaVm, env, instance);
     ffmpeg = new WFFmpeg(cppCallJavaUtils, dataSource);
     ffmpeg->setRenderFrameCallback(frrameCallBack);
     ffmpeg->prepare();
@@ -79,5 +81,28 @@ Java_com_wanglei_wplayer_WPlayer_native_1setSurface(JNIEnv *env, jobject instanc
         nativeWindow = 0;
     }
     nativeWindow = ANativeWindow_fromSurface(env,surface);
+    pthread_mutex_unlock(&mutex);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_wanglei_wplayer_WPlayer_native_1stop(JNIEnv *env, jobject instance) {
+
+    if (ffmpeg){
+        ffmpeg->stop();
+    }
+    DELETE(cppCallJavaUtils);
+}
+
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_wanglei_wplayer_WPlayer_native_1release(JNIEnv *env, jobject instance) {
+
+    pthread_mutex_lock(&mutex);
+    if (nativeWindow){
+        ANativeWindow_release(nativeWindow);
+        nativeWindow = 0;
+    }
     pthread_mutex_unlock(&mutex);
 }
