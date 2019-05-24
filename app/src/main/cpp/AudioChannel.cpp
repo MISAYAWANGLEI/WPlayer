@@ -2,6 +2,7 @@
 // Created by wanglei55 on 2019/4/30.
 //
 #include "AudioChannel.h"
+#include "macro.h"
 
 AudioChannel::AudioChannel(int id,AVCodecContext *codecContext,AVRational timeBase):BaseChannel(id,codecContext,timeBase) {
     //声道数
@@ -108,6 +109,7 @@ int AudioChannel::getPcm() {
     dataSize = samples * out_channels * out_samplesize;
     //记录这一帧音频相对时间
     clock = frame->pts * av_q2d(timeBase);
+    releaseAVFrame(&frame);
     return dataSize;
 }
 
@@ -215,5 +217,41 @@ void AudioChannel::play() {
 }
 
 void AudioChannel::stop() {
+    LOGE("AudioChannel::stop()");
+    isPlaying = 0;
+    packets.setWork(0);
+    frames.setWork(0);
+    pthread_join(pid_decode,0);
+    pthread_join(pid_play,0);
 
+    //设置停止状态
+    if (bqPlayerInterface) {
+        (*bqPlayerInterface)->SetPlayState(bqPlayerInterface, SL_PLAYSTATE_STOPPED);
+        bqPlayerInterface = 0;
+    }
+
+    //释放播放器
+    if(bqPlayerObject){
+        (*bqPlayerObject)->Destroy(bqPlayerObject);
+        bqPlayerObject = 0;
+        bqPlayerBufferQueueInterface = 0;
+    }
+
+    //释放混音器
+    if(outputMixObject){
+        (*outputMixObject)->Destroy(outputMixObject);
+        outputMixObject = 0;
+    }
+
+    //释放引擎
+    if(engineObject){
+        (*engineObject)->Destroy(engineObject);
+        engineObject = 0;
+        engineInterface = 0;
+    }
+
+    if (swrContext){
+        swr_free(&swrContext);
+        swrContext = 0;
+    }
 }

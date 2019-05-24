@@ -268,12 +268,12 @@ void WFFmpeg::_start() {
         //防止读取文件一下子读完了，导致oom
         //读一部分拿去播
         if (audioChannel && audioChannel->packets.size() > 100) {
-            //10ms
-            av_usleep(1000 * 10);
+            //5ms
+            av_usleep(1000 *5);
             continue;
         }
         if (videoChannel && videoChannel->packets.size() > 100) {
-            av_usleep(1000 * 10);
+            av_usleep(1000 * 5);
             continue;
         }
         //AVPacket是存储压缩编码数据相关信息的结构体
@@ -330,6 +330,7 @@ void WFFmpeg::setRenderFrameCallback(renderFrameCallBack callback) {
 }
 
 void *syncStop(void *args){
+    LOGE("syncStop");
     WFFmpeg *ffmpeg = static_cast<WFFmpeg *>(args);
     //等待prepare与play逻辑执行完在释放以下资源
     pthread_join(ffmpeg->pid_prepare,0);

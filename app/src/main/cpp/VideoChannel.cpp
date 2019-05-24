@@ -153,6 +153,7 @@ void VideoChannel::render() {
                     if(fabs(diff) >= 0.05){//差距比较大，考虑视频丢包
                         releaseAVFrame(&frame);
                         frames.sync();
+                        continue;
                     } else{//差距没那么大，视频不用丢包，播放不延时就可以了
 
                     }
@@ -162,8 +163,10 @@ void VideoChannel::render() {
         frameCallBack(dst_data[0],dst_linesize[0],codecContext->width,codecContext->height);
         releaseAVFrame(&frame);
     }
+    isPlaying = 0;
     av_freep(&dst_data[0]);
     sws_freeContext(swsContext);
+    swsContext = 0;
     releaseAVFrame(&frame);
 }
 
@@ -172,5 +175,10 @@ void VideoChannel::setRenderFrameCallBack(renderFrameCallBack callBack) {
 }
 
 void VideoChannel::stop() {
-
+    LOGE("VideoChannel::stop()");
+    isPlaying = 0;
+    frames.setWork(0);
+    packets.setWork(0);
+    pthread_join(decode_id, 0);
+    pthread_join(render_id, 0);
 }

@@ -98,7 +98,7 @@ Java_com_wanglei_wplayer_WPlayer_native_1stop(JNIEnv *env, jobject instance) {
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_wanglei_wplayer_WPlayer_native_1release(JNIEnv *env, jobject instance) {
-
+    LOGE("native_1release");
     pthread_mutex_lock(&mutex);
     if (nativeWindow){
         ANativeWindow_release(nativeWindow);
