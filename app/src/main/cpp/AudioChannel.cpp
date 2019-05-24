@@ -46,7 +46,7 @@ void AudioChannel::decode() {
             continue;
         }
         ret = avcodec_send_packet(codecContext,packet);
-        releaseAVPacket(&packet);
+        releaseAVPacket(&packet);//释放数据所占内存
         if(ret!=0){
             break;
         }

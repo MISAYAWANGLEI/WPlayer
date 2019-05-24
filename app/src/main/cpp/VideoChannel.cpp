@@ -76,6 +76,7 @@ void VideoChannel::decode() {
         }
         //将packet发送到解码器
         ret = avcodec_send_packet(codecContext,packet);
+        releaseAVPacket(&packet);
         if(ret!=0){
             break;
         }
@@ -147,7 +148,11 @@ void VideoChannel::render() {
                 double diff = clock - audioChannel->clock;//视频减音频
                 if(diff > 0){//视频快
                     LOGE("视频快了：%lf",diff);
-                    av_usleep((delay+diff) * 1000000);//多睡一会
+                    if (diff >1){
+                        av_usleep((delay *2 ) * 1000000);//差的比较大，慢慢赶
+                    } else{
+                        av_usleep((delay+diff) * 1000000);//差不多，多睡一会
+                    }
                 } else{//音频快
                     LOGE("音频快了：%lf",diff);
                     if(fabs(diff) >= 0.05){//差距比较大，考虑视频丢包
@@ -163,11 +168,11 @@ void VideoChannel::render() {
         frameCallBack(dst_data[0],dst_linesize[0],codecContext->width,codecContext->height);
         releaseAVFrame(&frame);
     }
-    isPlaying = 0;
     av_freep(&dst_data[0]);
+    isPlaying = 0;
+    releaseAVFrame(&frame);
     sws_freeContext(swsContext);
     swsContext = 0;
-    releaseAVFrame(&frame);
 }
 
 void VideoChannel::setRenderFrameCallBack(renderFrameCallBack callBack) {

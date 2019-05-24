@@ -40,6 +40,7 @@ void WFFmpeg::_prepare() {
     //设置超时时间 微妙 超时时间5秒
     av_dict_set(&options, "timeout", "50000000", 0);
     int ret = avformat_open_input(&formatContext,dataSource,0,&options);
+    av_dict_free(&options);
     if (ret!=0){
         LOGE("打开媒体地址失败:%s",av_err2str(ret));
         if (utils){
@@ -195,10 +196,8 @@ void WFFmpeg::_prepare() {
 
         AVRational timeBase = avStream->time_base;
         if(parameters->codec_type == AVMEDIA_TYPE_AUDIO){//音频
-
             audioChannel = new AudioChannel(i,codecContext,timeBase);
         } else if (parameters->codec_type == AVMEDIA_TYPE_VIDEO){//视频
-
             videoChannel = new VideoChannel(i,codecContext,timeBase,fps);
             videoChannel->setRenderFrameCallBack(frameCallBack);
         }
@@ -299,21 +298,21 @@ void WFFmpeg::_start() {
                 videoChannel ->packets.push(packet);//将数据塞到视频队列中
             }
         } else if(ret == AVERROR_EOF){//读取完成
-
-            if (audioChannel->packets.empty() && audioChannel->frames.empty()
-                && videoChannel->packets.empty() && videoChannel->frames.empty()) {
-                break;
-            }
-
             if (packet){
                 av_packet_free(&packet);
                 packet = 0;
+            }
+            if (audioChannel->packets.empty() && audioChannel->frames.empty()
+                && videoChannel->packets.empty() && videoChannel->frames.empty()) {
+                break;
             }
         } else{
             if (packet){
                 av_packet_free(&packet);
                 packet = 0;
             }
+            LOGE("av_read_frame......");
+            break;
         }
     }
     isPlaying = 0;

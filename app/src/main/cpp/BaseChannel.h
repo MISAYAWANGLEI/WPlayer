@@ -2,6 +2,7 @@
 #define B_H
 
 #include "SafeQueue.h"
+#include "macro.h"
 
 extern "C"{
 #include <libavcodec/avcodec.h>
@@ -16,12 +17,21 @@ public:
     }
 
     virtual ~BaseChannel(){
+        LOGE("~BaseChannel()");
         packets.clear();
         frames.clear();
+        if(codecContext){
+            LOGE("~BaseChannel() release codecContext");
+            avcodec_close(codecContext);
+            avcodec_free_context(&codecContext);
+            codecContext = 0;
+        }
+        LOGE("释放channel:%d %d", packets.size(), frames.size());
     }
 
     static void releaseAVPacket(AVPacket **packet){
         if (packet){
+            LOGE("releaseAVPacket");
             av_packet_free(packet);
             *packet = 0;
         }
@@ -29,6 +39,7 @@ public:
 
     static void releaseAVFrame(AVFrame **frame){
         if (frame){
+            LOGE("releaseAVFrame");
             av_frame_free(frame);
             *frame = 0;
         }
