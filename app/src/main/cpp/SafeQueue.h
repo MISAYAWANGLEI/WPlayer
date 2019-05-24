@@ -50,12 +50,13 @@ public:
         return queue.size();
     }
 
-    void push(const T value){
+    void push(T value){
         pthread_mutex_lock(&mutex);
         if(work){
             queue.push(value);
             pthread_cond_signal(&cond);
-            pthread_mutex_unlock(&mutex);
+        } else{
+            mReleaseCallBack(&value);
         }
         pthread_mutex_unlock(&mutex);
     }

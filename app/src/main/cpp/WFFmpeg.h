@@ -11,14 +11,14 @@ extern "C"{
 
 class WFFmpeg {
 public:
-    char *dataSource = nullptr;
-    CppCallJavaUtils *utils = nullptr;
+    char *dataSource = 0;
+    CppCallJavaUtils *utils = 0;
     pthread_t pid_prepare;
     pthread_t pid_play;
     pthread_t pid_stop;
-    AVFormatContext *formatContext = nullptr;
-    AudioChannel *audioChannel = nullptr;
-    VideoChannel *videoChannel = nullptr;
+    AVFormatContext *formatContext = 0;
+    AudioChannel *audioChannel = 0;
+    VideoChannel *videoChannel = 0;
     renderFrameCallBack frameCallBack;
 public:
     WFFmpeg(CppCallJavaUtils *utils, const char *dataSource);
