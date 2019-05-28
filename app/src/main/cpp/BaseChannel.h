@@ -3,6 +3,7 @@
 
 #include "SafeQueue.h"
 #include "macro.h"
+#include "CppCallJavaUtils.h"
 
 extern "C"{
 #include <libavcodec/avcodec.h>
@@ -10,8 +11,10 @@ extern "C"{
 
 class BaseChannel {
 public:
-    BaseChannel(int id,AVCodecContext *codecContext,AVRational timeBase):id(id),
-                        codecContext(codecContext),timeBase(timeBase){
+    BaseChannel(int id,AVCodecContext *codecContext,AVRational timeBase,pthread_mutex_t seekMutex
+                        ,CppCallJavaUtils *callJavaUtils):id(id),
+                        codecContext(codecContext),timeBase(timeBase),seekMutex(seekMutex)
+                        ,callJavaUtils(callJavaUtils){
         packets.setReleaseCallBack(releaseAVPacket);
         frames.setReleaseCallBack(releaseAVFrame);
     }
@@ -31,7 +34,6 @@ public:
 
     static void releaseAVPacket(AVPacket **packet){
         if (packet){
-            LOGE("releaseAVPacket");
             av_packet_free(packet);
             *packet = 0;
         }
@@ -39,10 +41,24 @@ public:
 
     static void releaseAVFrame(AVFrame **frame){
         if (frame){
-            LOGE("releaseAVFrame");
             av_frame_free(frame);
             *frame = 0;
         }
+    }
+
+    void clear(){
+        packets.clear();
+        frames.clear();
+    }
+
+    void startWork(){
+        packets.setWork(1);
+        frames.setWork(1);
+    }
+
+    void stopWork(){
+        packets.setWork(0);
+        frames.setWork(0);
     }
 
     int id;
@@ -53,6 +69,8 @@ public:
     SafeQueue<AVPacket *> packets;
     SafeQueue<AVFrame *> frames;
     AVRational timeBase;
+    pthread_mutex_t seekMutex;
+    CppCallJavaUtils *callJavaUtils;
     double clock;//音频或者视频相对时间：相对录制时的时间，用于音视频同步
 };
 

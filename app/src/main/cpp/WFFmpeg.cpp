@@ -15,11 +15,14 @@ WFFmpeg::WFFmpeg(CppCallJavaUtils *utils, const char *dataSource) {
     this->utils = utils;
     this->dataSource = new char[strlen(dataSource)+1];
     strcpy(this->dataSource,dataSource);
+    duration = 0;
+    pthread_mutex_init(&seekMutex,0);
 }
 
 WFFmpeg::~WFFmpeg() {
     DELETE(dataSource);
     DELETE(utils);
+    pthread_mutex_destroy(&seekMutex);
 }
 
 void *start_prepare(void* args){
@@ -58,7 +61,8 @@ void WFFmpeg::_prepare() {
         }
         return;
     }
-
+    duration = (formatContext->duration)/1000000;
+    LOGE("duration = %d",duration);
     //AVFormatContext主要存储视音频封装格式中包含的信息；
     LOGE("formatContext->nb_streams:%d",formatContext->nb_streams);
     //duration是以微秒为单位
@@ -155,7 +159,7 @@ void WFFmpeg::_prepare() {
 //        int priv_data_size：私有数据的大小
 
         //创建解码器上下文
-        AVCodecContext *codecContext = avcodec_alloc_context3(codec);
+        codecContext = avcodec_alloc_context3(codec);
 //        enum AVMediaType codec_type：编解码器的类型（视频，音频...）
 //        struct AVCodec  *codec：采用的解码器AVCodec（H.264,MPEG2...）
 //        int bit_rate：平均比特率
@@ -196,9 +200,9 @@ void WFFmpeg::_prepare() {
 
         AVRational timeBase = avStream->time_base;
         if(parameters->codec_type == AVMEDIA_TYPE_AUDIO){//音频
-            audioChannel = new AudioChannel(i,codecContext,timeBase);
+            audioChannel = new AudioChannel(i,codecContext,timeBase,seekMutex,utils);
         } else if (parameters->codec_type == AVMEDIA_TYPE_VIDEO){//视频
-            videoChannel = new VideoChannel(i,codecContext,timeBase,fps);
+            videoChannel = new VideoChannel(i,codecContext,timeBase,fps,seekMutex,utils);
             videoChannel->setRenderFrameCallBack(frameCallBack);
         }
     }
@@ -286,9 +290,11 @@ void WFFmpeg::_start() {
 //        int64_t pts：显示时间戳
 //        int64_t dts：解码时间戳
 //        int   stream_index：标识该AVPacket所属的视频/音频流。
+        pthread_mutex_lock(&seekMutex);
         AVPacket* packet = av_packet_alloc();
         //0 if OK, < 0 on error or end of file
         ret = av_read_frame(formatContext,packet);
+        pthread_mutex_unlock(&seekMutex);
         if (ret == 0){
             if (audioChannel && packet->stream_index == audioChannel->id){
                 //音频
@@ -346,6 +352,48 @@ void *syncStop(void *args){
     }
     DELETE(ffmpeg);
     return 0;
+}
+
+int WFFmpeg::getDuration() {
+    return duration;
+}
+
+void WFFmpeg::seek(int progress) {
+    //音视频都没有seek毛线啊
+    if (!audioChannel && !videoChannel){
+        return;
+    }
+
+    if(!formatContext){
+        return;
+    }
+    pthread_mutex_lock(&seekMutex);
+
+    int64_t seekToTime = progress* AV_TIME_BASE;//转为微妙
+    /**
+     * seek到请求的时间 之前最近的关键帧,只有从关键帧才能开始解码出完整图片
+     * stream_index:可以控制快进音频还是视频，-1表示音视频均快进
+     */
+    av_seek_frame(formatContext,-1,seekToTime,AVSEEK_FLAG_BACKWARD);
+
+    //清空解码器中缓存的数据
+    if (codecContext){
+        avcodec_flush_buffers(codecContext);
+    }
+
+    if (audioChannel){
+        audioChannel->stopWork();
+        audioChannel->clear();
+        audioChannel->startWork();
+    }
+
+    if (videoChannel){
+        videoChannel->stopWork();
+        videoChannel->clear();
+        videoChannel->startWork();
+    }
+
+    pthread_mutex_unlock(&seekMutex);
 }
 
 void WFFmpeg::stop() {

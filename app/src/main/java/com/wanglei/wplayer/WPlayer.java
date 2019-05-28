@@ -14,7 +14,7 @@ public class WPlayer implements SurfaceHolder.Callback {
     private String dataSource;
     private SurfaceHolder holder;
     private OnPrepareListener listener;
-
+    private OnErrorListener onErrorListener;
     /**
      * 设置播放的文件或者直播地址
      */
@@ -35,9 +35,52 @@ public class WPlayer implements SurfaceHolder.Callback {
     }
 
     public void onError(int errorCode){
-        Log.i("WFFMPEG","Java接到回调:"+errorCode);
+        stop();
+        if (onErrorListener!=null){
+            onErrorListener.onError(errorCode);
+        }
     }
 
+    public int getDuration() {
+        return native_getDuration();
+    }
+
+    public void seek(final int progress) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                native_seek(progress);
+            }
+        }).start();
+    }
+
+    public interface OnErrorListener {
+        void onError(int error);
+    }
+
+    public void setOnErrorListener(OnErrorListener onErrorListener) {
+        this.onErrorListener = onErrorListener;
+    }
+
+    private OnProgressListener onProgressListener;
+
+    /**
+     * native回调java层回传播放进度
+     * @param progress
+     */
+    public void onProgress(int progress) {
+        if (null != onProgressListener) {
+            onProgressListener.onProgress(progress);
+        }
+    }
+
+    public void setOnProgressListener(OnProgressListener onProgressListener) {
+        this.onProgressListener = onProgressListener;
+    }
+
+    public interface OnProgressListener {
+        void onProgress(int progress);
+    }
 
     public void onPrepare(){
         if (null != listener){
@@ -118,4 +161,6 @@ public class WPlayer implements SurfaceHolder.Callback {
     native void native_stop();
     native void native_release();
     native void native_setSurface(Surface surface);
+    native int native_getDuration();
+    native void native_seek(int progress);
 }

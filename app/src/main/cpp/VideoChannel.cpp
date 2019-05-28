@@ -18,7 +18,9 @@ void syncAVFrame(queue<AVFrame *> &q){
 }
 
 VideoChannel::VideoChannel(int id, AVCodecContext *codecContext,
-        AVRational timeBase,int fps):BaseChannel(id,codecContext,timeBase) {
+        AVRational timeBase,int fps,pthread_mutex_t seekMutex,
+        CppCallJavaUtils *callJavaUtils):BaseChannel(id,codecContext,timeBase,
+                seekMutex,callJavaUtils) {
     this->fps = fps;
     frames.setSyncHandle(syncAVFrame);
 }
@@ -74,6 +76,7 @@ void VideoChannel::decode() {
         if (!ret){//取出失败，继续取数据
             continue;
         }
+        pthread_mutex_lock(&seekMutex);
         //将packet发送到解码器
         ret = avcodec_send_packet(codecContext,packet);
         releaseAVPacket(&packet);
@@ -83,6 +86,7 @@ void VideoChannel::decode() {
         //解码后的数据，代表一个画面
         AVFrame *frame = av_frame_alloc();
         ret = avcodec_receive_frame(codecContext,frame);
+        pthread_mutex_unlock(&seekMutex);
         //需要更多的数据才能够进行解码
         if (ret == AVERROR(EAGAIN)) {
             continue;
@@ -164,6 +168,10 @@ void VideoChannel::render() {
                     }
                 }
             }
+        }
+        //没有音频才通过视频进度回调，有则以音频为主
+        if (callJavaUtils && !audioChannel){
+            callJavaUtils->onProgress(THREAD_CHILD,clock);
         }
         frameCallBack(dst_data[0],dst_linesize[0],codecContext->width,codecContext->height);
         releaseAVFrame(&frame);

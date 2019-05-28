@@ -4,7 +4,8 @@
 #include "AudioChannel.h"
 #include "macro.h"
 
-AudioChannel::AudioChannel(int id,AVCodecContext *codecContext,AVRational timeBase):BaseChannel(id,codecContext,timeBase) {
+AudioChannel::AudioChannel(int id,AVCodecContext *codecContext,AVRational timeBase,
+        pthread_mutex_t seekMutex,CppCallJavaUtils *callJavaUtils):BaseChannel(id,codecContext,timeBase,seekMutex,callJavaUtils) {
     //声道数
     out_channels = av_get_channel_layout_nb_channels(AV_CH_LAYOUT_STEREO);
     //每个采样16位表示
@@ -45,6 +46,8 @@ void AudioChannel::decode() {
         if (!ret){
             continue;
         }
+        //与seek逻辑清空codecContext解码器中缓存数据同步,否则多线程操作codecContext会有同步问题
+        pthread_mutex_lock(&seekMutex);
         ret = avcodec_send_packet(codecContext,packet);
         releaseAVPacket(&packet);//释放数据所占内存
         if(ret!=0){
@@ -53,6 +56,7 @@ void AudioChannel::decode() {
         //解码后的数据
         AVFrame *frame = av_frame_alloc();
         ret = avcodec_receive_frame(codecContext,frame);
+        pthread_mutex_unlock(&seekMutex);
         //需要更多的数据才能够进行解码
         if (ret == AVERROR(EAGAIN)) {
             continue;
@@ -108,7 +112,10 @@ int AudioChannel::getPcm() {
     //算成双声道字节数：每个采样16位表示（2字节）
     dataSize = samples * out_channels * out_samplesize;
     //记录这一帧音频相对时间
-    clock = frame->pts * av_q2d(timeBase);
+    clock = frame->best_effort_timestamp * av_q2d(timeBase);
+    if (callJavaUtils){
+        callJavaUtils->onProgress(THREAD_CHILD,clock);
+    }
     releaseAVFrame(&frame);
     return dataSize;
 }

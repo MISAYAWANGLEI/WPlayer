@@ -10,6 +10,9 @@ extern "C"{
 }
 
 class WFFmpeg {
+private:
+    int duration;
+    pthread_mutex_t seekMutex;
 public:
     char *dataSource = 0;
     CppCallJavaUtils *utils = 0;
@@ -17,6 +20,7 @@ public:
     pthread_t pid_play;
     pthread_t pid_stop;
     AVFormatContext *formatContext = 0;
+    AVCodecContext *codecContext = 0;
     AudioChannel *audioChannel = 0;
     VideoChannel *videoChannel = 0;
     renderFrameCallBack frameCallBack;
@@ -29,6 +33,8 @@ public:
     void start();
     void _start();
     void stop();
+    int getDuration();
+    void seek(int progress);
     bool isPlaying;
 };
 

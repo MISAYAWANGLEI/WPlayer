@@ -106,3 +106,24 @@ Java_com_wanglei_wplayer_WPlayer_native_1release(JNIEnv *env, jobject instance) 
     }
     pthread_mutex_unlock(&mutex);
 }
+
+//获取视频时长：直播返回0
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_wanglei_wplayer_WPlayer_native_1getDuration(JNIEnv *env, jobject instance) {
+
+    if (ffmpeg) {
+        return ffmpeg->getDuration();
+    }
+    return 0;
+}
+
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_wanglei_wplayer_WPlayer_native_1seek(JNIEnv *env, jobject instance, jint progress) {
+
+    if (ffmpeg){
+        ffmpeg->seek(progress);
+    }
+}
