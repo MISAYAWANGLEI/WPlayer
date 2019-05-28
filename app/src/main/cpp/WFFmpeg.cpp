@@ -328,6 +328,10 @@ void WFFmpeg::_start() {
     if (videoChannel){
         videoChannel->stop();
     }
+    if(codecContext){
+        avcodec_close(codecContext);
+        avcodec_free_context(&codecContext);
+    }
 }
 
 void WFFmpeg::setRenderFrameCallback(renderFrameCallBack callback) {
