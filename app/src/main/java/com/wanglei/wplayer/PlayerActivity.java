@@ -29,7 +29,7 @@ public class PlayerActivity extends AppCompatActivity implements SeekBar.OnSeekB
         player = new WPlayer();
         player.setSurfaceView(surfaceView);
         //player.setDataSource("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8");
-        player.setDataSource("/sdcard/3.mp4");
+        player.setDataSource("/sdcard/1.mp4");
         seekBar = findViewById(R.id.seekBar);
         progress_time = findViewById(R.id.progress_time);
         total_time = findViewById(R.id.total_time);
