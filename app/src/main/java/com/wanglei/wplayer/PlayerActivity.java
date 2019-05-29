@@ -29,8 +29,8 @@ public class PlayerActivity extends AppCompatActivity implements SeekBar.OnSeekB
         player = new WPlayer();
         player.setSurfaceView(surfaceView);
         //player.setDataSource("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8");
-        player.setDataSource("http://king.psy-1.com/music/scene/xiayuqingpen-HVvYcVfY5u8BXPDlkIE1.mp3");
-        //player.setDataSource("/sdcard/1.mp4");
+        //player.setDataSource("http://king.psy-1.com/music/scene/xiayuqingpen-HVvYcVfY5u8BXPDlkIE1.mp3");
+        player.setDataSource("/sdcard/1.mp4");
         //player.setDataSource("/sdcard/4.m4a");
         seekBar = findViewById(R.id.seekBar);
         progress_time = findViewById(R.id.progress_time);

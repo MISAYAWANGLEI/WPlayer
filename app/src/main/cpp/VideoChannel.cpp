@@ -105,14 +105,14 @@ void VideoChannel::render() {
                                 codecContext->width,codecContext->height,AV_PIX_FMT_RGBA,
                                 SWS_BILINEAR,NULL,NULL,NULL);
     if (!swsContext){
-        LOGE("swsContext init failed");
+        LOGE("视频 swsContext init failed");
         return;
     }
     AVFrame *frame = 0;
     uint8_t *dst_data[4];
     int dst_linesize[4];
     int ret;
-    if ((ret = av_image_alloc(dst_data, dst_linesize,
+    if ((av_image_alloc(dst_data, dst_linesize,
                               codecContext->width,codecContext->height,AV_PIX_FMT_RGBA, 1)) < 0) {
         LOGE("av_image_alloc failed");
         return;

@@ -216,6 +216,10 @@ void AudioChannel::play() {
     swrContext = swr_alloc_set_opts(0,AV_CH_LAYOUT_STEREO,AV_SAMPLE_FMT_S16,out_sample_rate,
             codecContext->channel_layout,codecContext->sample_fmt,codecContext->sample_rate,
             0,0);
+    if (!swrContext){
+        LOGE("音频 swrContext init failed");
+        return;
+    }
     swr_init(swrContext);
 
     isPlaying = 1;
