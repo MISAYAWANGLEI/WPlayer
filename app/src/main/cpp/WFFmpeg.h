@@ -13,6 +13,9 @@ class WFFmpeg {
 private:
     int duration;
     pthread_mutex_t seekMutex;
+    pthread_mutex_t mutex_pause = PTHREAD_MUTEX_INITIALIZER;
+    pthread_cond_t cond_pause = PTHREAD_COND_INITIALIZER;
+    bool isPause = 0;
 public:
     char *dataSource = 0;
     CppCallJavaUtils *utils = 0;
@@ -36,5 +39,7 @@ public:
     int getDuration();
     void seek(int progress);
     bool isPlaying;
+    void pause();
+    void continuePlay();
 };
 

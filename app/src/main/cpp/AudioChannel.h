@@ -14,13 +14,17 @@ extern "C"{
 
 class AudioChannel : public BaseChannel{
 public:
-    AudioChannel(int id,AVCodecContext *codecContext,AVRational timeBase,pthread_mutex_t seekMutex,CppCallJavaUtils *callJavaUtils);
+    AudioChannel(int id,AVCodecContext *codecContext,AVRational timeBase,
+            pthread_mutex_t seekMutex,CppCallJavaUtils *callJavaUtils,
+            pthread_mutex_t mutex_pause,pthread_cond_t cond_pause);
     ~AudioChannel();
     void play();
     void decode();
     void _play();
     int getPcm();
     void stop();
+    void pause();
+    void continuePlay();
     uint8_t *data = 0;
     int out_channels;
     int out_samplesize;

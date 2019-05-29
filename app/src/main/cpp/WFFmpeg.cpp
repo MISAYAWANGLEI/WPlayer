@@ -200,9 +200,11 @@ void WFFmpeg::_prepare() {
 
         AVRational timeBase = avStream->time_base;
         if(parameters->codec_type == AVMEDIA_TYPE_AUDIO){//音频
-            audioChannel = new AudioChannel(i,codecContext,timeBase,seekMutex,utils);
+            audioChannel = new AudioChannel(i,codecContext,timeBase,seekMutex,
+                    utils,mutex_pause,cond_pause);
         } else if (parameters->codec_type == AVMEDIA_TYPE_VIDEO){//视频
-            videoChannel = new VideoChannel(i,codecContext,timeBase,fps,seekMutex,utils);
+            videoChannel = new VideoChannel(i,codecContext,timeBase,fps,seekMutex,
+                    utils,mutex_pause,cond_pause);
             videoChannel->setRenderFrameCallBack(frameCallBack);
         }
     }
@@ -268,6 +270,12 @@ uint8_t motion_subsample_log2：一个宏块中的运动矢量采样个数，取
 void WFFmpeg::_start() {
     int ret;
     while (isPlaying){
+        //暂停逻辑
+        pthread_mutex_lock(&mutex_pause);
+        while (isPause){
+            pthread_cond_wait(&cond_pause,&mutex_pause);
+        }
+        pthread_mutex_unlock(&mutex_pause);
         //防止读取文件一下子读完了，导致oom
         //读一部分拿去播
         if (audioChannel && audioChannel->packets.size() > 100) {
@@ -406,8 +414,29 @@ void WFFmpeg::stop() {
     pthread_create(&pid_stop,0,syncStop,this);
 }
 
+void WFFmpeg::pause() {
+    isPause = 1;
+    if (videoChannel){
+        videoChannel->pause();
+    }
+    if (audioChannel){
+        audioChannel->pause();
+    }
+}
 
-
+void WFFmpeg::continuePlay() {
+    isPause = 0;
+    if (videoChannel){
+        videoChannel->continuePlay();
+    }
+    if (audioChannel){
+        audioChannel->continuePlay();
+    }
+    //唤醒线程
+    pthread_mutex_lock(&mutex_pause);
+    pthread_cond_broadcast(&cond_pause);
+    pthread_mutex_unlock(&mutex_pause);
+}
 
 
 

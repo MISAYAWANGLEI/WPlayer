@@ -127,3 +127,21 @@ Java_com_wanglei_wplayer_WPlayer_native_1seek(JNIEnv *env, jobject instance, jin
         ffmpeg->seek(progress);
     }
 }
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_wanglei_wplayer_WPlayer_native_1pause(JNIEnv *env, jobject instance) {
+
+    if (ffmpeg){
+        ffmpeg->pause();
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_wanglei_wplayer_WPlayer_native_1continue(JNIEnv *env, jobject instance) {
+
+    if (ffmpeg){
+        ffmpeg->continuePlay();
+    }
+}

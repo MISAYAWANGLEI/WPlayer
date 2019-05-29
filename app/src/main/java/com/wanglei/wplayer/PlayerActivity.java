@@ -150,4 +150,14 @@ public class PlayerActivity extends AppCompatActivity implements SeekBar.OnSeekB
         //进度调整
         player.seek(progress);
     }
+
+
+    public void pause(View view) {
+        player.pause();
+    }
+
+    //重新开始
+    public void continuePlay(View view) {
+        player.continuePlay();
+    }
 }

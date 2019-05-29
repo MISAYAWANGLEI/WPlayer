@@ -19,8 +19,9 @@ void syncAVFrame(queue<AVFrame *> &q){
 
 VideoChannel::VideoChannel(int id, AVCodecContext *codecContext,
         AVRational timeBase,int fps,pthread_mutex_t seekMutex,
-        CppCallJavaUtils *callJavaUtils):BaseChannel(id,codecContext,timeBase,
-                seekMutex,callJavaUtils) {
+        CppCallJavaUtils *callJavaUtils,
+        pthread_mutex_t mutex_pause,pthread_cond_t cond_pause):BaseChannel(id,codecContext,timeBase,
+                seekMutex,callJavaUtils,mutex_pause,cond_pause) {
     this->fps = fps;
     frames.setSyncHandle(syncAVFrame);
 }
@@ -69,6 +70,7 @@ void VideoChannel::play() {
 void VideoChannel::decode() {
     AVPacket *packet = 0;
     while (isPlaying){
+
         int ret = packets.pop(packet);//阻塞的队列
         if (!isPlaying){//队列阻塞期间，可能暂停应用
             break;
@@ -120,6 +122,14 @@ void VideoChannel::render() {
     //每个画面显示的时间，也就是图片之间显示间隔，单位秒
     double frame_delay = 1.0/fps;
     while (isPlaying){
+
+        //暂停逻辑
+        pthread_mutex_lock(&mutex_pause);
+        while (isPause){
+            pthread_cond_wait(&cond_pause,&mutex_pause);
+        }
+        pthread_mutex_unlock(&mutex_pause);
+
         ret = frames.pop(frame);
         if (!isPlaying){
             break;
@@ -194,4 +204,16 @@ void VideoChannel::stop() {
     packets.setWork(0);
     pthread_join(decode_id, 0);
     pthread_join(render_id, 0);
+}
+
+void VideoChannel::pause(){
+    isPause = 1;
+}
+
+void VideoChannel::continuePlay(){
+    isPause = 0;
+    //唤醒线程继续工作
+    pthread_mutex_lock(&mutex_pause);
+    pthread_cond_broadcast(&cond_pause);
+    pthread_mutex_unlock(&mutex_pause);
 }

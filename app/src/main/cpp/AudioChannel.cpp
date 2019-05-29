@@ -5,7 +5,10 @@
 #include "macro.h"
 
 AudioChannel::AudioChannel(int id,AVCodecContext *codecContext,AVRational timeBase,
-        pthread_mutex_t seekMutex,CppCallJavaUtils *callJavaUtils):BaseChannel(id,codecContext,timeBase,seekMutex,callJavaUtils) {
+        pthread_mutex_t seekMutex,CppCallJavaUtils *callJavaUtils,
+                           pthread_mutex_t mutex_pause,
+                           pthread_cond_t cond_pause):BaseChannel(id,codecContext,
+                                   timeBase,seekMutex,callJavaUtils,mutex_pause,cond_pause) {
     //声道数
     out_channels = av_get_channel_layout_nb_channels(AV_CH_LAYOUT_STEREO);
     //每个采样16位表示
@@ -207,6 +210,14 @@ void AudioChannel::_play() {
      * 6、手动激活一下这个回调
      */
     bqPlayerCallback(bqPlayerBufferQueueInterface, this);
+}
+
+void AudioChannel::pause() {
+    (*bqPlayerInterface)->SetPlayState(bqPlayerInterface, SL_PLAYSTATE_PAUSED);
+}
+
+void AudioChannel::continuePlay() {
+    (*bqPlayerInterface)->SetPlayState(bqPlayerInterface, SL_PLAYSTATE_PLAYING);
 }
 
 void AudioChannel::play() {

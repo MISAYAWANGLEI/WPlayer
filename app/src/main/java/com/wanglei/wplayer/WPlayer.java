@@ -122,6 +122,20 @@ public class WPlayer implements SurfaceHolder.Callback {
     }
 
     /**
+     * 暂停
+     */
+    public void pause(){
+        native_pause();
+    }
+
+    /**
+     * 继续
+     */
+    public void continuePlay(){
+        native_continue();
+    }
+
+    /**
      * 画布创建好了
      *
      * @param holder
@@ -163,4 +177,6 @@ public class WPlayer implements SurfaceHolder.Callback {
     native void native_setSurface(Surface surface);
     native int native_getDuration();
     native void native_seek(int progress);
+    native void native_pause();
+    native void native_continue();
 }

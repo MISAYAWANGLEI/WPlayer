@@ -11,11 +11,14 @@ typedef void (*renderFrameCallBack)(uint8_t *, int, int, int);
 
 class VideoChannel : public BaseChannel{
 public:
-    VideoChannel(int id,AVCodecContext *codecContext,AVRational timeBase,int fps,pthread_mutex_t seekMutex,CppCallJavaUtils *callJavaUtils);
+    VideoChannel(int id,AVCodecContext *codecContext,
+            AVRational timeBase,int fps,pthread_mutex_t seekMutex,CppCallJavaUtils *callJavaUtils,
+            pthread_mutex_t mutex_pause,pthread_cond_t cond_pause);
     ~VideoChannel();
 
     void play();//播放
-
+    void pause();
+    void continuePlay();
     void setRenderFrameCallBack(renderFrameCallBack callBack);
     void decode();//解码
     void render();//播放
