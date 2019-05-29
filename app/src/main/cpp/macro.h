@@ -16,7 +16,7 @@
 #define THREAD_CHILD 2
 
 //错误代码
-//打不开视频
+//打不开
 #define FFMPEG_CAN_NOT_OPEN_URL 1
 //找不到流媒体
 #define FFMPEG_CAN_NOT_FIND_STREAMS 2

@@ -36,6 +36,7 @@ void WFFmpeg::prepare() {
 }
 
 void WFFmpeg::_prepare() {
+    av_register_all();
     //初始化网络
     avformat_network_init();
     //打开媒体地址，相关信息存入formatContext

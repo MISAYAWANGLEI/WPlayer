@@ -35,7 +35,7 @@ public class WPlayer implements SurfaceHolder.Callback {
     }
 
     public void onError(int errorCode){
-        stop();
+        //stop();
         if (onErrorListener!=null){
             onErrorListener.onError(errorCode);
         }
